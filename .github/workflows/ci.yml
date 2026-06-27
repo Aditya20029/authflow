@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  DATABASE_URL: "file:./dev.db"
+
+jobs:
+  verify:
+    name: Test, build, and eval
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # postinstall runs `prisma generate`
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Create database
+        run: npx prisma db push --skip-generate
+
+      - name: Seed synthetic data
+        run: npm run db:seed
+
+      - name: Unit tests (rules engine, eval rubric, parsing)
+        run: npm test
+
+      - name: Type-check and production build
+        run: npm run build
+
+      - name: Letter eval harness
+        run: npm run eval

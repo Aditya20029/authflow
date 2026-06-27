@@ -1,101 +1,139 @@
-import Image from "next/image";
+import Link from "next/link"
+import {
+  Clock,
+  CheckCircle2,
+  Timer,
+  AlertTriangle,
+  Percent,
+  PlusCircle,
+  ArrowRight,
+} from "lucide-react"
 
-export default function Home() {
+import { getDashboardData } from "@/lib/data/dashboard"
+import { formatHours, formatPercent } from "@/lib/format"
+import { PageContainer } from "@/components/primitives/page-container"
+import { PageHeader } from "@/components/primitives/page-header"
+import { SectionCard } from "@/components/primitives/section-card"
+import { KpiCard } from "@/components/primitives/kpi-card"
+import { Button } from "@/components/ui/button"
+import {
+  VolumeAreaChart,
+  StatusDonut,
+  TurnaroundBarChart,
+  ApprovalLineChart,
+} from "@/components/charts/dashboard-charts"
+import { AtRiskTable } from "@/components/dashboard/at-risk-table"
+import { ActivityFeed } from "@/components/dashboard/activity-feed"
+
+export const dynamic = "force-dynamic"
+
+export default async function DashboardPage() {
+  const data = await getDashboardData()
+  const k = data.kpis
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <PageContainer>
+      <PageHeader
+        eyebrow="Overview"
+        title="Dashboard"
+        description="Practice-wide prior authorization health at a glance."
+      >
+        <Button asChild>
+          <Link href="/new">
+            <PlusCircle className="h-4 w-4" />
+            New request
+          </Link>
+        </Button>
+      </PageHeader>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+        <KpiCard
+          label="Pending PAs"
+          value={String(k.pending)}
+          icon={Clock}
+          trend={k.pendingTrend}
+          sublabel={`${k.totalActive} active total`}
+        />
+        <KpiCard
+          label="Approved this month"
+          value={String(k.approvedThisMonth)}
+          icon={CheckCircle2}
+          tone="success"
+          trend={k.approvedTrend}
+        />
+        <KpiCard
+          label="Avg turnaround"
+          value={formatHours(k.avgTurnaroundHours)}
+          icon={Timer}
+          trend={k.turnaroundTrend}
+          sublabel="last 30 days"
+        />
+        <KpiCard
+          label="At risk"
+          value={String(k.atRisk)}
+          icon={AlertTriangle}
+          tone={k.overdue > 0 ? "danger" : "warning"}
+          sublabel={k.overdue > 0 ? `${k.overdue} overdue` : "within 48 hours"}
+        />
+        <KpiCard
+          label="Approval rate"
+          value={formatPercent(k.approvalRate)}
+          icon={Percent}
+          tone="success"
+          trend={k.approvalRateTrend}
+          sublabel="approved vs denied"
+        />
+      </div>
+
+      <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <SectionCard
+          className="lg:col-span-2"
+          title="Request volume"
+          description="New prior authorizations per week over the last 13 weeks."
         >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+          <VolumeAreaChart data={data.volume} />
+        </SectionCard>
+        <SectionCard title="Status mix" description="All requests by current status.">
+          <StatusDonut data={data.statusBreakdown} />
+        </SectionCard>
+      </div>
+
+      <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <SectionCard
+          title="Turnaround by payer"
+          description="Average hours from submission to decision."
         >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+          <TurnaroundBarChart data={data.turnaroundByPayer} />
+        </SectionCard>
+        <SectionCard
+          title="Approval rate trend"
+          description="Weekly approved share of decided requests."
         >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+          <ApprovalLineChart data={data.approvalTrend} />
+        </SectionCard>
+      </div>
+
+      <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <SectionCard
+          className="lg:col-span-2"
+          contentClassName="px-0"
+          title="At risk and overdue"
+          description="Open requests approaching or past their deadline."
+          action={
+            <Button variant="ghost" size="sm" asChild>
+              <Link href="/worklist">
+                View worklist
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </Button>
+          }
+        >
+          <AtRiskTable rows={data.atRiskRows} />
+        </SectionCard>
+        <SectionCard title="Recent activity" description="The latest status changes.">
+          <ActivityFeed items={data.activity} />
+        </SectionCard>
+      </div>
+    </PageContainer>
+  )
 }

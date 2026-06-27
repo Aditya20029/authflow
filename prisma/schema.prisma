@@ -1,0 +1,173 @@
+// AuthFlow data model.
+//
+// Status, priority, and document source are stored as String columns backed by
+// TypeScript string-literal unions (the single source of truth lives in
+// lib/status.ts and types.ts). SQLite does not reliably support native enums or
+// Json columns, so chart and criteria structures are JSON-encoded String columns
+// parsed with typed helpers in lib/chart.ts. Everything here is portable to
+// Postgres with no schema changes beyond the datasource provider below.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  // Local dev uses SQLite. For a Vercel deploy, switch provider to "postgresql"
+  // and point DATABASE_URL at a hosted Postgres (Neon, Supabase). No model edits
+  // are required because no SQLite-only types are used.
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Payer {
+  id           String             @id @default(cuid())
+  name         String
+  planType     String
+  formularyRef String
+  rules        PayerRule[]
+  patients     Patient[]
+  requests     PriorAuthRequest[]
+  createdAt    DateTime           @default(now())
+}
+
+model Provider {
+  id        String             @id @default(cuid())
+  firstName String
+  lastName  String
+  npi       String             @unique
+  specialty String
+  requests  PriorAuthRequest[]
+  createdAt DateTime           @default(now())
+}
+
+model Medication {
+  id          String             @id @default(cuid())
+  name        String
+  brandName   String?
+  drugClass   String
+  ndc         String
+  hcpcs       String?
+  cpt         String?
+  isSpecialty Boolean            @default(false)
+  route       String?
+  indication  String
+  rules       PayerRule[]
+  requests    PriorAuthRequest[]
+  createdAt   DateTime           @default(now())
+}
+
+model Patient {
+  id          String   @id @default(cuid())
+  firstName   String
+  lastName    String
+  dateOfBirth DateTime
+  sex         String
+  mrn         String   @unique
+  memberId    String
+  // JSON-encoded chart data (String for SQLite + Postgres portability)
+  diagnoses      String @default("[]")
+  priorTherapies String @default("[]")
+  labs           String @default("[]")
+  weightKg    Float?
+  payerId     String?
+  payer       Payer?             @relation(fields: [payerId], references: [id])
+  requests    PriorAuthRequest[]
+  createdAt   DateTime           @default(now())
+}
+
+model PayerRule {
+  id                  String     @id @default(cuid())
+  payerId             String
+  payer               Payer      @relation(fields: [payerId], references: [id], onDelete: Cascade)
+  medicationId        String
+  medication          Medication @relation(fields: [medicationId], references: [id], onDelete: Cascade)
+  paRequired          Boolean    @default(true)
+  stepTherapyRequired Boolean    @default(false)
+  // JSON-encoded String arrays of codes / drug names / lab labels
+  requiredDiagnoses      String @default("[]")
+  requiredPriorTherapies String @default("[]")
+  requiredLabs           String @default("[]")
+  quantityLimit       Boolean    @default(false)
+  criteriaSummary     String
+  createdAt           DateTime   @default(now())
+
+  @@unique([payerId, medicationId])
+}
+
+model PriorAuthRequest {
+  id                       String   @id @default(cuid())
+  referenceId              String   @unique
+  patientId                String
+  patient                  Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  providerId               String
+  provider                 Provider @relation(fields: [providerId], references: [id])
+  medicationId             String
+  medication               Medication @relation(fields: [medicationId], references: [id])
+  payerId                  String
+  payer                    Payer    @relation(fields: [payerId], references: [id])
+  // String-backed unions (see lib/status.ts): PaStatus and Priority
+  status                   String   @default("Draft")
+  priority                 String   @default("Routine")
+  diagnosisCode            String
+  diagnosisLabel           String
+  clinicalJustification    String?
+  letterOfMedicalNecessity String?
+  denialReason             String?
+  appealStatus             String?
+  assignedCoordinator      String?
+  createdAt                DateTime  @default(now())
+  submittedAt              DateTime?
+  decisionAt               DateTime?
+  deadline                 DateTime
+  turnaroundHours          Float?
+  requiredDocuments        RequiredDocument[]
+  statusEvents             StatusEvent[]
+
+  @@index([status])
+  @@index([payerId])
+  @@index([createdAt])
+}
+
+model RequiredDocument {
+  id        String           @id @default(cuid())
+  requestId String
+  request   PriorAuthRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  label     String
+  // DocSource union: Chart | Lab | Provider | Manual
+  source    String           @default("Manual")
+  satisfied Boolean          @default(false)
+  evidence  String?
+  createdAt DateTime         @default(now())
+
+  @@index([requestId])
+}
+
+model StatusEvent {
+  id         String           @id @default(cuid())
+  requestId  String
+  request    PriorAuthRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  fromStatus String?
+  toStatus   String
+  note       String?
+  createdAt  DateTime         @default(now())
+
+  @@index([requestId])
+}
+
+// Observability for the AI Letter of Medical Necessity generator. One row per
+// generation: which model ran, whether it fell back to the template, latency,
+// token usage, and outcome. Standalone telemetry (requestId is a soft pointer).
+model GenerationLog {
+  id           String   @id @default(cuid())
+  requestId    String?
+  model        String
+  usedFallback Boolean  @default(false)
+  // ok | error | rate_limited | capped
+  status       String   @default("ok")
+  latencyMs    Int
+  inputTokens  Int?
+  outputTokens Int?
+  createdAt    DateTime @default(now())
+
+  @@index([createdAt])
+}
