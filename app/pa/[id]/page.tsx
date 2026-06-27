@@ -81,7 +81,7 @@ export default async function PaDetailPage({
         />
       </div>
 
-      <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
+      <div className="mt-4 grid grid-cols-1 items-start gap-4 lg:grid-cols-3">
         <div className="space-y-4 lg:col-span-2">
           <SectionCard title="Medication and service">
             <MedicationCard pa={pa} />
@@ -116,7 +116,7 @@ export default async function PaDetailPage({
           </SectionCard>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-4 lg:sticky lg:top-6 self-start">
           <SectionCard title="Request details">
             <SummaryCard pa={pa} />
           </SectionCard>

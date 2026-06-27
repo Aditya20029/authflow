@@ -68,7 +68,7 @@ const config: Config = {
       },
       boxShadow: {
         soft: "0 1px 2px 0 hsl(var(--foreground) / 0.04), 0 1px 3px 0 hsl(var(--foreground) / 0.06)",
-        card: "0 1px 2px -1px hsl(var(--foreground) / 0.08), 0 2px 8px -2px hsl(var(--foreground) / 0.06)",
+        card: "0 1px 2px -1px hsl(var(--foreground) / 0.10), 0 2px 10px -3px hsl(var(--foreground) / 0.09)",
         lift: "0 4px 12px -2px hsl(var(--foreground) / 0.10), 0 8px 24px -4px hsl(var(--foreground) / 0.08)",
       },
       keyframes: {

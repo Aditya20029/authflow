@@ -1,4 +1,4 @@
-import { Building2, ShieldAlert, ShieldCheck } from "lucide-react"
+import { Building2, ShieldCheck } from "lucide-react"
 
 import { getPayers, type PayerRuleView, type PayerView } from "@/lib/data/payers"
 import { displayList } from "@/lib/rules"
@@ -94,11 +94,11 @@ function RuleRow({ rule }: { rule: PayerRuleView }) {
         {rule.paRequired ? (
           <span
             className={cn(
-              "inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-medium",
-              TONE.warning.pill,
+              "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-medium",
+              TONE.neutral.pill,
             )}
           >
-            <ShieldAlert className="h-3 w-3" />
+            <span className="h-1.5 w-1.5 rounded-full bg-slate-400" aria-hidden />
             PA required
           </span>
         ) : (

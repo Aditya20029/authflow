@@ -104,155 +104,164 @@ export function IntakeForm({ data }: { data: IntakeData }) {
     <div className="space-y-4">
       <Stepper current={currentStep} />
 
-      <SectionCard
-        title="Order"
-        description="Choose the patient, prescriber, and medication. Coverage is checked the moment a drug and plan are in place."
-      >
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Field label="Patient" htmlFor="patient">
-            <Select value={patientId} onValueChange={setPatientId}>
-              <SelectTrigger id="patient">
-                <SelectValue placeholder="Select a patient" />
-              </SelectTrigger>
-              <SelectContent>
-                {data.patients.map((p) => (
-                  <SelectItem key={p.id} value={p.id}>
-                    {p.name}
-                    <span className="ml-2 text-xs text-muted-foreground">
-                      {p.mrn}
-                    </span>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </Field>
-
-          <Field label="Prescriber" htmlFor="provider">
-            <Select value={providerId} onValueChange={setProviderId}>
-              <SelectTrigger id="provider">
-                <SelectValue placeholder="Select a prescriber" />
-              </SelectTrigger>
-              <SelectContent>
-                {data.providers.map((p) => (
-                  <SelectItem key={p.id} value={p.id}>
-                    {p.name}
-                    <span className="ml-2 text-xs text-muted-foreground">
-                      {p.specialty}
-                    </span>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </Field>
-
-          <Field label="Medication or service" htmlFor="medication">
-            <Select value={medicationId} onValueChange={setMedicationId}>
-              <SelectTrigger id="medication">
-                <SelectValue placeholder="Select a medication" />
-              </SelectTrigger>
-              <SelectContent>
-                {data.medications.map((m) => (
-                  <SelectItem key={m.id} value={m.id}>
-                    {m.name}
-                    {m.brandName && (
-                      <span className="ml-2 text-xs text-muted-foreground">
-                        {m.brandName}
-                      </span>
-                    )}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </Field>
-
-          <Field label="Priority" htmlFor="priority">
-            <Select value={priority} onValueChange={setPriority}>
-              <SelectTrigger id="priority">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {PRIORITIES.map((p) => (
-                  <SelectItem key={p} value={p}>
-                    {PRIORITY_META[p].label}
-                    <span className="ml-2 text-xs text-muted-foreground">
-                      {PRIORITY_META[p].slaHours}h target
-                    </span>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </Field>
-        </div>
-
-        {patient && (
-          <p className="mt-4 text-sm text-muted-foreground">
-            Plan on file:{" "}
-            <span className="font-medium text-foreground">{patient.payerName}</span>
-            {" · "}
-            {patient.age} year old {patient.sex.toLowerCase()}
-          </p>
-        )}
-      </SectionCard>
-
-      {showCoverage && coverage && (
+      <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,1fr)_360px]">
         <SectionCard
-          title="Coverage check"
-          description="Real-time Coverage Requirements Discovery for this drug and plan."
+          title="Order"
+          description="Choose the patient, prescriber, and medication. Coverage is checked the moment a drug and plan are in place."
         >
-          <CoverageResult coverage={coverage} />
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Field label="Patient" htmlFor="patient">
+              <Select value={patientId} onValueChange={setPatientId}>
+                <SelectTrigger id="patient">
+                  <SelectValue placeholder="Select a patient" />
+                </SelectTrigger>
+                <SelectContent>
+                  {data.patients.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.name}
+                      <span className="ml-2 text-xs text-muted-foreground">
+                        {p.mrn}
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
 
-          {coverage.required && readiness && patient && (
-            <div className="mt-4 space-y-3">
-              <div className="rounded-lg border border-border bg-muted/40 p-3">
-                <p className="text-sm">
-                  From{" "}
-                  <span className="font-medium text-foreground">
-                    {patient.name.split(" ")[0]}
-                  </span>
-                  {"'s"} chart,{" "}
-                  <span className="font-medium tabular-nums text-foreground">
-                    {readiness.satisfied}
-                  </span>{" "}
-                  of{" "}
-                  <span className="font-medium tabular-nums text-foreground">
-                    {readiness.total}
-                  </span>{" "}
-                  requirements can be auto-filled.{" "}
-                  {readiness.missing.length > 0 ? (
-                    <span className={TONE.warning.text}>
-                      {readiness.missing.length} should be captured before the
-                      patient leaves.
-                    </span>
-                  ) : (
-                    <span className={TONE.brand.text}>
-                      Everything needed is already on file.
-                    </span>
-                  )}
-                </p>
-              </div>
-              <ul className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
-                {docs.map((d) => (
-                  <li key={d.label} className="flex items-center gap-2 text-sm">
-                    {d.satisfied ? (
-                      <CheckCircle2 className={cn("h-4 w-4 shrink-0", TONE.success.text)} />
-                    ) : (
-                      <CircleAlert className={cn("h-4 w-4 shrink-0", TONE.warning.text)} />
-                    )}
-                    <span
-                      className={cn(
-                        "truncate",
-                        d.satisfied
-                          ? "text-muted-foreground"
-                          : "text-foreground",
+            <Field label="Prescriber" htmlFor="provider">
+              <Select value={providerId} onValueChange={setProviderId}>
+                <SelectTrigger id="provider">
+                  <SelectValue placeholder="Select a prescriber" />
+                </SelectTrigger>
+                <SelectContent>
+                  {data.providers.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.name}
+                      <span className="ml-2 text-xs text-muted-foreground">
+                        {p.specialty}
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
+
+            <Field label="Medication or service" htmlFor="medication">
+              <Select value={medicationId} onValueChange={setMedicationId}>
+                <SelectTrigger id="medication">
+                  <SelectValue placeholder="Select a medication" />
+                </SelectTrigger>
+                <SelectContent>
+                  {data.medications.map((m) => (
+                    <SelectItem key={m.id} value={m.id}>
+                      {m.name}
+                      {m.brandName && (
+                        <span className="ml-2 text-xs text-muted-foreground">
+                          {m.brandName}
+                        </span>
                       )}
-                    >
-                      {d.label}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
+
+            <Field label="Priority" htmlFor="priority">
+              <Select value={priority} onValueChange={setPriority}>
+                <SelectTrigger id="priority">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {PRIORITIES.map((p) => (
+                    <SelectItem key={p} value={p}>
+                      {PRIORITY_META[p].label}
+                      <span className="ml-2 text-xs text-muted-foreground">
+                        {PRIORITY_META[p].slaHours}h target
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
+          </div>
+
+          {patient && (
+            <p className="mt-4 text-sm text-muted-foreground">
+              Plan on file:{" "}
+              <span className="font-medium text-foreground">{patient.payerName}</span>
+              {" · "}
+              {patient.age} year old {patient.sex.toLowerCase()}
+            </p>
           )}
+        </SectionCard>
+
+        <div className="lg:sticky lg:top-6">
+          {showCoverage && coverage ? (
+            <SectionCard
+              title="Coverage check"
+              description="Real-time Coverage Requirements Discovery for this drug and plan."
+            >
+              <CoverageResult coverage={coverage} />
+            </SectionCard>
+          ) : (
+            <CoveragePreviewGhost />
+          )}
+        </div>
+      </div>
+
+      {showCoverage && coverage?.required && readiness && patient && (
+        <SectionCard
+          title="Documentation readiness"
+          description="What the payer requires, auto-checked against the patient's chart."
+        >
+          <div className="space-y-3">
+            <div className="rounded-lg border border-border bg-muted/40 p-3">
+              <p className="text-sm">
+                From{" "}
+                <span className="font-medium text-foreground">
+                  {patient.name.split(" ")[0]}
+                </span>
+                {"'s"} chart,{" "}
+                <span className="font-medium tabular-nums text-foreground">
+                  {readiness.satisfied}
+                </span>{" "}
+                of{" "}
+                <span className="font-medium tabular-nums text-foreground">
+                  {readiness.total}
+                </span>{" "}
+                requirements can be auto-filled.{" "}
+                {readiness.missing.length > 0 ? (
+                  <span className={TONE.warning.text}>
+                    {readiness.missing.length} should be captured before the
+                    patient leaves.
+                  </span>
+                ) : (
+                  <span className={TONE.brand.text}>
+                    Everything needed is already on file.
+                  </span>
+                )}
+              </p>
+            </div>
+            <ul className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+              {docs.map((d) => (
+                <li key={d.label} className="flex items-center gap-2 text-sm">
+                  {d.satisfied ? (
+                    <CheckCircle2 className={cn("h-4 w-4 shrink-0", TONE.success.text)} />
+                  ) : (
+                    <CircleAlert className={cn("h-4 w-4 shrink-0", TONE.warning.text)} />
+                  )}
+                  <span
+                    className={cn(
+                      "truncate",
+                      d.satisfied ? "text-muted-foreground" : "text-foreground",
+                    )}
+                  >
+                    {d.label}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
         </SectionCard>
       )}
 
@@ -302,6 +311,45 @@ function Field({
     <div className="space-y-1.5">
       <Label htmlFor={htmlFor}>{label}</Label>
       {children}
+    </div>
+  )
+}
+
+function CoveragePreviewGhost() {
+  const previews = [
+    "Whether a prior authorization is required",
+    "Which documents the payer requires",
+    "What is already captured in the chart",
+  ]
+  return (
+    <div className="flex flex-col gap-4 rounded-xl border border-dashed border-border bg-muted/30 p-5">
+      <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10 text-primary ring-1 ring-inset ring-primary/15">
+        <ShieldCheck className="h-5 w-5" />
+      </span>
+      <div>
+        <h3 className="font-display text-sm font-semibold text-foreground">
+          Coverage check
+        </h3>
+        <p className="mt-1 text-pretty text-sm leading-relaxed text-muted-foreground">
+          Pick a patient and medication to run real-time Coverage Requirements
+          Discovery and see exactly what this plan needs, before the patient
+          leaves the room.
+        </p>
+      </div>
+      <ul className="space-y-2 border-t border-border/70 pt-3">
+        {previews.map((t) => (
+          <li
+            key={t}
+            className="flex items-center gap-2.5 text-sm text-muted-foreground"
+          >
+            <span
+              className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary/40"
+              aria-hidden
+            />
+            {t}
+          </li>
+        ))}
+      </ul>
     </div>
   )
 }
@@ -357,7 +405,7 @@ function Stepper({ current }: { current: number }) {
                 done
                   ? "bg-primary text-primary-foreground"
                   : active
-                    ? "bg-primary/15 text-primary ring-1 ring-primary/40"
+                    ? "bg-primary/15 text-primary ring-2 ring-primary/30"
                     : "bg-muted text-muted-foreground",
               )}
             >
@@ -372,7 +420,13 @@ function Stepper({ current }: { current: number }) {
               {s.label}
             </span>
             {i < STEPS.length - 1 && (
-              <span className="mx-1 h-px flex-1 bg-border" aria-hidden />
+              <span
+                className={cn(
+                  "mx-1 h-0.5 flex-1 rounded-full",
+                  done ? "bg-primary/40" : "bg-border",
+                )}
+                aria-hidden
+              />
             )}
           </li>
         )

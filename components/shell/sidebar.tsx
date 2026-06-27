@@ -28,13 +28,13 @@ export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
             className={cn(
               "group relative flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
               active
-                ? "bg-accent text-accent-foreground"
+                ? "bg-gradient-to-r from-primary/[0.14] via-primary/[0.06] to-transparent text-foreground ring-1 ring-inset ring-primary/10"
                 : "text-muted-foreground hover:bg-muted hover:text-foreground",
             )}
           >
             <span
               className={cn(
-                "absolute left-0 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-primary transition-all",
+                "absolute left-0 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-gradient-to-b from-primary to-emerald-400 transition-all",
                 active ? "opacity-100" : "opacity-0",
               )}
               aria-hidden

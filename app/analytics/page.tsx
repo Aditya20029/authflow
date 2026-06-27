@@ -10,7 +10,7 @@ import {
 
 import { getAnalyticsData } from "@/lib/data/analytics"
 import { getAssistantMetrics } from "@/lib/data/assistant"
-import { CHART_COLORS, TONE, type Tone } from "@/lib/status"
+import { TONE, type Tone } from "@/lib/status"
 import { cn } from "@/lib/utils"
 import { formatHours, formatPercent } from "@/lib/format"
 import { PageContainer } from "@/components/primitives/page-container"
@@ -77,7 +77,7 @@ export default async function AnalyticsPage() {
                   </div>
                   <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-muted">
                     <div
-                      className="h-full rounded-full bg-red-500/80"
+                      className="h-full rounded-full bg-rose-500/55"
                       style={{ width: `${maxReason > 0 ? (r.value / maxReason) * 100 : 0}%` }}
                     />
                   </div>
@@ -95,7 +95,6 @@ export default async function AnalyticsPage() {
         >
           <HorizontalBarChart
             data={data.volumeByDrug}
-            color={CHART_COLORS.brand}
             ariaLabel="Prior authorization volume by drug"
             height={Math.max(220, data.volumeByDrug.length * 34)}
           />

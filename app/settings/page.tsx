@@ -122,13 +122,20 @@ export default function SettingsPage() {
                     <span className="flex h-9 w-9 items-center justify-center rounded-md bg-background text-primary ring-1 ring-border">
                       <Icon className="h-4 w-4" />
                     </span>
-                    <Badge variant="secondary">Coming soon</Badge>
+                    <span className="rounded-full bg-muted px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground">
+                      Coming soon
+                    </span>
                   </div>
                   <h3 className="mt-3 text-sm font-semibold">{it.title}</h3>
                   <p className="mt-1 flex-1 text-pretty text-xs leading-relaxed text-muted-foreground">
                     {it.body}
                   </p>
-                  <Button variant="outline" size="sm" disabled className="mt-3">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled
+                    className="mt-3 self-start border-dashed text-muted-foreground opacity-70"
+                  >
                     Connect
                   </Button>
                 </div>

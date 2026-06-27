@@ -232,7 +232,12 @@ export function WorklistTable({ rows }: { rows: WorklistRow[] }) {
                     )}
                   </TableCell>
                   <TableCell className="hidden lg:table-cell">
-                    <span className="text-sm text-muted-foreground">{r.payerName}</span>
+                    <span
+                      className="block max-w-[180px] truncate text-sm text-muted-foreground"
+                      title={r.payerName}
+                    >
+                      {r.payerName}
+                    </span>
                   </TableCell>
                   <TableCell>
                     <StatusPill status={r.status} />

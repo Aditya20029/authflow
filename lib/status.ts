@@ -55,9 +55,9 @@ export const STATUS_META: Record<PaStatus, StatusMeta> = {
     label: "Ready to submit",
     description: "All criteria satisfied, awaiting submission",
     phase: "open",
-    pill: "bg-teal-50 text-teal-800 ring-1 ring-inset ring-teal-600/25 dark:bg-teal-400/10 dark:text-teal-300 dark:ring-teal-400/25",
-    dot: "bg-teal-500",
-    hex: "#0d9488",
+    pill: "bg-cyan-50 text-cyan-800 ring-1 ring-inset ring-cyan-600/25 dark:bg-cyan-400/10 dark:text-cyan-300 dark:ring-cyan-400/25",
+    dot: "bg-cyan-500",
+    hex: "#0891b2",
   },
   Submitted: {
     label: "Submitted",
