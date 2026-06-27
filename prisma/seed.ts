@@ -639,14 +639,18 @@ function timesFor(flow: Flow, risk?: "atRisk" | "overdue") {
     case "inreview": {
       createdAt = minus(DAY * ri(1, 14))
       submittedAt = addMs(createdAt, H * ri(4, 40))
-      if (submittedAt.getTime() > now.getTime()) submittedAt = minus(H * ri(2, 20))
+      if (submittedAt.getTime() >= now.getTime()) {
+        submittedAt = new Date((createdAt.getTime() + now.getTime()) / 2)
+      }
       deadline = riskDeadline()
       break
     }
     case "submitted": {
       createdAt = minus(DAY * ri(0, 6) + H * ri(1, 20))
       submittedAt = addMs(createdAt, H * ri(2, 18))
-      if (submittedAt.getTime() > now.getTime()) submittedAt = minus(H * ri(1, 10))
+      if (submittedAt.getTime() >= now.getTime()) {
+        submittedAt = new Date((createdAt.getTime() + now.getTime()) / 2)
+      }
       deadline = riskDeadline()
       break
     }

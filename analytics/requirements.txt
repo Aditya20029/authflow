@@ -1,0 +1,2 @@
+# Python data layer for AuthFlow. Reads the same SQLite database the app uses.
+pandas>=2.2

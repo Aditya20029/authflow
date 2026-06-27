@@ -53,7 +53,8 @@ The payer and EHR sides are simulated with realistic synthetic data and determin
 - **Reads** go through a thin data access layer in `lib/data/*` (React Server Components call Prisma directly). **Mutations** are Next.js Server Actions in `lib/actions/*` that call `revalidatePath`. The single exception is the streaming AI route handler.
 - An **LLM-as-judge evaluation harness** (`lib/eval` + `eval/run.ts`) scores every generated letter against an eight-criterion rubric, with an optional Claude judge and an aggregate report.
 - **Observability and hardening** on the AI route: every generation is logged (model, latency, token usage, fallback flag, status) to a `GenerationLog` table and surfaced on the Analytics screen, behind per-IP rate limiting and a daily spend cap that both degrade gracefully to the template.
-- **52 automated tests** (vitest) over the rules engine, eval rubric, deadline logic, parsing, and formatting, plus a **GitHub Actions** workflow that seeds, tests, builds, and runs the eval on every push.
+- **52 automated tests** (vitest) over the rules engine, eval rubric, deadline logic, parsing, and formatting, plus a **GitHub Actions** workflow that seeds, tests, builds, runs the eval, and runs the Python data-quality gate on every push.
+- A **Python data layer** (`analytics/`) reads the same SQLite database with pandas to run an analytics pipeline and a Great Expectations style data-quality gate.
 
 ---
 
@@ -120,6 +121,16 @@ The Letter of Medical Necessity is drafted by an AI assistant on the request det
 ## Observability
 
 Every letter generation is recorded in a `GenerationLog` row capturing the model, latency, token usage, whether it fell back to the template, and the outcome (ok, error, rate limited, or spend capped). The Analytics screen surfaces this as live telemetry: generation count, average latency, fallback rate, total output tokens, and a status breakdown. The AI route is guarded by per-IP rate limiting and a daily spend cap, both of which degrade gracefully to the template rather than failing the request.
+
+## Python data layer
+
+`analytics/` is a Python (pandas) layer over the same SQLite database the app uses. `data_quality.py` runs Great Expectations / Pydeequ style expectations (enum domains, uniqueness, completeness, decision integrity, temporal ordering, referential integrity, JSON validity) and exits non-zero on a critical failure, so it gates CI. `pa_analytics.py` computes the practice metrics as a data-engineering artifact and writes JSON and Markdown reports. See `analytics/README.md`.
+
+```bash
+python -m pip install -r analytics/requirements.txt
+python analytics/data_quality.py     # data-quality gate
+python analytics/pa_analytics.py      # writes analytics/output/report.{json,md}
+```
 
 ---
 

@@ -38,6 +38,13 @@ yarn-error.log*
 # generated eval reports
 /eval/reports
 
+# python data layer
+/analytics/output
+__pycache__/
+*.pyc
+.venv/
+venv/
+
 # vercel
 .vercel
 
