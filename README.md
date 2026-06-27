@@ -54,7 +54,7 @@ The payer and EHR sides are simulated with realistic synthetic data and determin
 - An **LLM-as-judge evaluation harness** (`lib/eval` + `eval/run.ts`) scores every generated letter against an eight-criterion rubric, with an optional Claude judge and an aggregate report.
 - **Observability and hardening** on the AI route: every generation is logged (model, latency, token usage, fallback flag, status) to a `GenerationLog` table and surfaced on the Analytics screen, behind per-IP rate limiting and a daily spend cap that both degrade gracefully to the template.
 - **52 automated tests** (vitest) over the rules engine, eval rubric, deadline logic, parsing, and formatting, plus a **GitHub Actions** workflow that seeds, tests, builds, runs the eval, and runs the Python data-quality gate on every push.
-- A **Python data layer** (`analytics/`) reads the same SQLite database with pandas to run an analytics pipeline and a Great Expectations style data-quality gate.
+- A **Python data layer** (`analytics/`) reads the same SQLite database with pandas to run an analytics pipeline, a Great Expectations style data-quality gate, and a scikit-learn approval-likelihood model (about 0.91 ROC AUC).
 
 ---
 
@@ -128,9 +128,20 @@ Every letter generation is recorded in a `GenerationLog` row capturing the model
 
 ```bash
 python -m pip install -r analytics/requirements.txt
-python analytics/data_quality.py     # data-quality gate
+python analytics/data_quality.py      # data-quality gate
 python analytics/pa_analytics.py      # writes analytics/output/report.{json,md}
+python analytics/approval_model.py    # trains the model, writes figures + metrics
 ```
+
+### Approval-likelihood model
+
+`approval_model.py` trains a gradient-boosted classifier (scikit-learn `HistGradientBoostingClassifier`) to predict whether a request will be approved from its features. It reads the real drug-class and payer vocabulary from the database so the model speaks the app's domain, then learns an interpretable signal: documentation completeness drives approval up, while prior denials and stricter payers pull it down. On a held-out split it reaches about **0.91 ROC AUC** and **82% accuracy** over a 60% approval base rate. Permutation importance (the honest, model-agnostic kind) ranks step-therapy documentation, qualifying diagnosis, and prior denials as the top drivers, which is exactly what the rules engine rewards.
+
+| ROC curve | Permutation importance | Confusion matrix |
+| --- | --- | --- |
+| ![ROC curve](analytics/figures/roc.png) | ![Permutation feature importance](analytics/figures/feature_importance.png) | ![Confusion matrix](analytics/figures/confusion_matrix.png) |
+
+The approval label is generated from a realistic latent function rather than the demo's recorded decisions, because those are payer discretion and carry little learnable signal on their own. The pipeline, metrics, and figures are fully reproducible from the fixed seed and run as a step in CI.
 
 ---
 

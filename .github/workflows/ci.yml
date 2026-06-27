@@ -52,3 +52,6 @@ jobs:
 
       - name: Analytics report (Python)
         run: python analytics/pa_analytics.py
+
+      - name: Approval-likelihood model (Python)
+        run: python analytics/approval_model.py

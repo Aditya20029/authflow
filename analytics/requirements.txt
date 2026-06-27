@@ -1,2 +1,4 @@
 # Python data layer for AuthFlow. Reads the same SQLite database the app uses.
 pandas>=2.2
+scikit-learn>=1.4
+matplotlib>=3.8
